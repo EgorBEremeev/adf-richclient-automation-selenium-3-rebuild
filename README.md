@@ -32,6 +32,7 @@ Caused by: java.lang.NoSuchMethodError: org.openqa.selenium.support.ui.WebDriver
 	Help -> Marketplace -> Enhanced Class Decompiler
 	Windows -> Preferences -> Java -> Decompiler -> Default Class Decompiler: CFR -> Applay and Close	
 3. Set User Libraries
+```
 	Windows -> Preferences -> Java -> Build Path -> User Libraries
 		 New->
 			Name -> selenium-java-3.3.1
@@ -45,12 +46,14 @@ Caused by: java.lang.NoSuchMethodError: org.openqa.selenium.support.ui.WebDriver
 			Name -> adf-richclient-automation-11.jar
 			Add External JARs... ->
 				path\to\Oracle_Home\oracle_common\modules\oracle.adf.view\
-										adf-richclient-automation-11.jar
+					adf-richclient-automation-11.jar
 		 ->Finish
 	 -> Applay and Close
-
+```
 ## Steps	
-1. Eclipse -> New -> Java Project
+1. Create Java Project
+```
+Eclipse -> New -> Java Project
 	Name -> project_name
 	JDK -> 1.8
 	Build Path -> Libraries ->	Add Library ->
@@ -58,15 +61,19 @@ Caused by: java.lang.NoSuchMethodError: org.openqa.selenium.support.ui.WebDriver
 										User Libraries ...
 											selenium-java-3.3.1
 											adf-richclient-automation-11.jar
-
-2. Project Explorer -> adf-richclient-automation-11.jar -> Context Menu -> Export Sources
+```
+2. Decompile adf-richclient-automation-11.jar
+```
+Project Explorer -> adf-richclient-automation-11.jar -> Context Menu -> Export Sources
 	path\to\project_name\src\
 		adf-richclient-automation-11-src.zip
 	Project Explorer -> Refresh
 		src -> adf-richclient-automation-11-src.zip
+```
 3. Extract decompiled sources into path\to\project_name\src\
-		adf-richclient-automation-11-src.zip -> Extract into current folder
-4. Project Explorer -> Refresh
+4. Check the src
+```
+Project Explorer -> Refresh
 		src -> adf-richclient-automation-11-src.zip
 				* oracle.adf.view.rich.automation.selenium
 				* oracle.adf.view.rich.automation.test
@@ -75,27 +82,34 @@ Caused by: java.lang.NoSuchMethodError: org.openqa.selenium.support.ui.WebDriver
 				* oracle.adf.view.rich.automation.test.selenium
 				org.openqa.selenium
 				org.openqa.selenium.firefox
-5.1 Delete classes used for and with Selenium RC: 	
+```
+5.1 Delete classes used for and with Selenium RC: 
+```
 		path/to/project_name/src/oracle/adf/view/rich/automation/selenium/RichSelenium.java -> Delete
+```
 5.2 Delete packages oracle.adf.view.rich.automation.test.* -> Delete
+```
 			oracle.adf.view.rich.automation.test
 			oracle.adf.view.rich.automation.test.browserfactory
 			oracle.adf.view.rich.automation.test.component
 			oracle.adf.view.rich.automation.test.selenium
-
+```
 6. Fix errors:
-	path/to/project_name/src/oracle/adf/view/rich/automation/selenium/RichWebDrivers.java
-		241 Type mismatch: cannot convert from element type Object to String -> 
-			fix 239 -> List<String> logs = (List) jsExecutor.executeScript(_GET_AND_CLEAR_LOG_MESSAGES_JS,
+   - path/to/project_name/src/oracle/adf/view/rich/automation/selenium/RichWebDrivers.java
+     - [] 241 Type mismatch: cannot convert from element type Object to String ->
+     ```
+    		fix 239 -> List<String> logs = (List) jsExecutor.executeScript(_GET_AND_CLEAR_LOG_MESSAGES_JS,
 			= 
 			List<String> logs = (List) jsExecutor.executeScript(_GET_AND_CLEAR_LOG_MESSAGES_JS,
 					new Object[]{logLevel.toString().toUpperCase()});
 			for (String s : logs) {
 				sbf.append(s).append(_NEW_LINE);
 			}
-		
-		321 Type mismatch: cannot convert from element type Object to String ->
-			fix 320 -> Set<String> handles = webDriver.getWindowHandles();
+     ```
+     - [] 321 Type mismatch: cannot convert from element type Object to String ->
+	  
+	```
+	  		fix 320 -> Set<String> handles = webDriver.getWindowHandles();
 			=
 			public String apply(WebDriver webDriver) {
 				Set<String> handles = webDriver.getWindowHandles();
@@ -106,8 +120,10 @@ Caused by: java.lang.NoSuchMethodError: org.openqa.selenium.support.ui.WebDriver
 				}
 				return null;
 			}
-
+	```
 7. Build and Export into jar
+        
+```
 	remove ->	path\to\project_name\src\
 		adf-richclient-automation-11-src.zip
 	Project Explorer -> Export -> Java -> JAR file -> Next
@@ -115,22 +131,24 @@ Caused by: java.lang.NoSuchMethodError: org.openqa.selenium.support.ui.WebDriver
 		check Export generated classes and resources
 		uncheck .classpath, .project
 			-> Finish -> Ok in warning dialog  
-
-
+```
 8. Optional fix error in classes from test.* packages.
 
-	path/to/project_name/src/oracle/adf/view/rich/automation/test/selenium/WebDriverManager.java
-		87 Type mismatch: cannot convert from element type Object to String ->
+	- path/to/project_name/src/oracle/adf/view/rich/automation/test/selenium/WebDriverManager.java
+	  - []	87 Type mismatch: cannot convert from element type Object to String ->
+          
+           ```
 			fix 85 Set<String> windowHandles = webDriver.getWindowHandles();
 			=
 			try {
 				Set<String> windowHandles = webDriver.getWindowHandles();
 				_LOG.fine("try to close all windows... ");
 				for (String handle : windowHandles) {	
-				
-	path/to/project_name/src/oracle/adf/view/rich/automation/test/selenium/RichWebDriverTest.java
-		953 Syntax error on token "finally", delete this token ->
-			fix -> delete  956,952,949, 941
+	   ```
+	- path/to/project_name/src/oracle/adf/view/rich/automation/test/selenium/RichWebDriverTest.java
+	  - []	953 Syntax error on token "finally", delete this token ->
+        
+        ~~~~            fix -> delete  956,952,949, 941
 			=
 			protected void refresh() {
 				_LOG.fine("Executing refresh()");
@@ -146,24 +164,25 @@ Caused by: java.lang.NoSuchMethodError: org.openqa.selenium.support.ui.WebDriver
 					this.waitForPage();
 				}
 			}
-
-		1026 Unreachable catch block for Exception. It is already handled by the catch block for Throwable ->
-			fix-> replace whole method by variant of Jad Decompiler-> 
+        ~~~~~
+        
+	  - []	1026 Unreachable catch block for Exception. It is already handled by the catch block for Throwable ->
+         		 ```java
+			 fix-> replace whole method by variant of Jad Decompiler-> 
 				-> Windows -> Preferences -> Java -> Decompiler -> Default Class Decompiler: Jad -> Applay and Close
-				
 				-> fix 1020, 1028 Duplicate local variable cachingEnabled ->
 					fix-> delete
 					-> 1019 String msg;
 					-> 1018 boolean cachingEnabled;
 			=
 			protected void onShutdownBrowser() {
-				_LOG.finest("Shutting down browser");
+				\_LOG.finest("Shutting down browser");
 				try {
-					_logSeleniumBrowserLogAndResetLoggerLevel();
+					\_logSeleniumBrowserLogAndResetLoggerLevel();
 				} catch (Exception e) {
 					boolean cachingEnabled;
 					String msg;
-					_LOG.warning("The page did not generate any logs.");
+					\_LOG.warning("The page did not generate any logs.");
 				} finally {
 					boolean cachingEnabled = isBrowserCachingEnabled();
 					try {
@@ -176,24 +195,28 @@ Caused by: java.lang.NoSuchMethodError: org.openqa.selenium.support.ui.WebDriver
 						String msg = cachingEnabled
 								? "Failed to release the browser. Error message: %s"
 								: "Failed to shutdown the browser. Error message: %s";
-
-						_LOG.severe(String.format(msg, new Object[]{t.getMessage()}));
+						\_LOG.severe(String.format(msg, new Object[]{t.getMessage()}));
 					}
 				}
 			}
-			
-		1047 Type mismatch: cannot convert from element type Object to WebElement ->
+	  ```		
+	  - []	1047 Type mismatch: cannot convert from element type Object to WebElement ->
+          ```
 			fix 1046 List<WebElement> allOptions = element.findElements(By.xpath((String) builder.toString()));
 			=
 			List<WebElement> allOptions = element.findElements(By.xpath((String) builder.toString()));
 			for (WebElement option : allOptions) {
-				
-	path/to/project_name/src/oracle/adf/view/rich/automation/test/UrlFactories.java
-		34 Type mismatch: cannot convert from UrlFactory to UrlFactories.UrlFactoryImpl ->
+	  ```			
+	- path/to/project_name/src/oracle/adf/view/rich/automation/test/UrlFactories.java
+	  - []	34 Type mismatch: cannot convert from UrlFactory to UrlFactories.UrlFactoryImpl ->
+          ```
 			fix Add cast to 'UrlFactoryImpl'
 			=
 			factory = (UrlFactoryImpl) urlFactoryIterator.next();
-		52 Type mismatch: cannot convert from UrlFactory to UrlFactories.UrlFactoryImpl
+          ``` 
+	  - []	52 Type mismatch: cannot convert from UrlFactory to UrlFactories.UrlFactoryImpl
+          ```
 			fix Add cast to 'UrlFactoryImpl'
 			=
-			UrlFactoryImpl urlFactoryImpl = (UrlFactoryImpl) (_INSTANCE = factory != null ? factory : new UrlFactoryImpl());			
+			UrlFactoryImpl urlFactoryImpl = (UrlFactoryImpl) (_INSTANCE = factory != null ? factory : new UrlFactoryImpl());
+          ```
