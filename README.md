@@ -29,8 +29,10 @@ Caused by: java.lang.NoSuchMethodError: org.openqa.selenium.support.ui.WebDriver
 ## Environment
 1. Install Eclipse
 2. Install Decompiler pluging
+```
 	Help -> Marketplace -> Enhanced Class Decompiler
 	Windows -> Preferences -> Java -> Decompiler -> Default Class Decompiler: CFR -> Applay and Close	
+```
 3. Set User Libraries
 ```
 	Windows -> Preferences -> Java -> Build Path -> User Libraries
@@ -56,11 +58,10 @@ Caused by: java.lang.NoSuchMethodError: org.openqa.selenium.support.ui.WebDriver
 Eclipse -> New -> Java Project
 	Name -> project_name
 	JDK -> 1.8
-	Build Path -> Libraries ->	Add Library ->
-									User Library -> Next
-										User Libraries ...
-											selenium-java-3.3.1
-											adf-richclient-automation-11.jar
+	Build Path -> Libraries -> Add Library -> User Library -> Next
+		User Libraries ...
+			selenium-java-3.3.1
+			adf-richclient-automation-11.jar
 ```
 2. Decompile adf-richclient-automation-11.jar
 ```
@@ -77,11 +78,11 @@ Project Explorer -> Refresh
 		src -> adf-richclient-automation-11-src.zip
 				* oracle.adf.view.rich.automation.selenium
 				* oracle.adf.view.rich.automation.test
-				oracle.adf.view.rich.automation.test.browserfactory
+				   oracle.adf.view.rich.automation.test.browserfactory
 				* oracle.adf.view.rich.automation.test.component
 				* oracle.adf.view.rich.automation.test.selenium
-				org.openqa.selenium
-				org.openqa.selenium.firefox
+				   org.openqa.selenium
+				   org.openqa.selenium.firefox
 ```
 5.1 Delete classes used for and with Selenium RC: 
 ```
@@ -97,126 +98,120 @@ Project Explorer -> Refresh
 6. Fix errors:
    - path/to/project_name/src/oracle/adf/view/rich/automation/selenium/RichWebDrivers.java
      - [] 241 Type mismatch: cannot convert from element type Object to String ->
-     ```
-    		fix 239 -> List<String> logs = (List) jsExecutor.executeScript(_GET_AND_CLEAR_LOG_MESSAGES_JS,
-			= 
-			List<String> logs = (List) jsExecutor.executeScript(_GET_AND_CLEAR_LOG_MESSAGES_JS,
-					new Object[]{logLevel.toString().toUpperCase()});
-			for (String s : logs) {
-				sbf.append(s).append(_NEW_LINE);
-			}
-     ```
+       ```java
+       fix 239 -> List<String> logs = (List) jsExecutor.executeScript(_GET_AND_CLEAR_LOG_MESSAGES_JS,
+		= 
+		List<String> logs = (List) jsExecutor.executeScript(_GET_AND_CLEAR_LOG_MESSAGES_JS,
+				new Object[]{logLevel.toString().toUpperCase()});
+		for (String s : logs) {
+			sbf.append(s).append(_NEW_LINE);
+		}
+       ```
      - [] 321 Type mismatch: cannot convert from element type Object to String ->
-	  
-	```
-	  		fix 320 -> Set<String> handles = webDriver.getWindowHandles();
-			=
-			public String apply(WebDriver webDriver) {
-				Set<String> handles = webDriver.getWindowHandles();
-				for (String handle : handles) {
-					if (openWindowHandles.contains(handle))
-						continue;
-					return handle;
-				}
-				return null;
+       ```java
+       fix 320 -> Set<String> handles = webDriver.getWindowHandles();
+		=
+		public String apply(WebDriver webDriver) {
+			Set<String> handles = webDriver.getWindowHandles();
+			for (String handle : handles) {
+				if (openWindowHandles.contains(handle))
+					continue;
+				return handle;
 			}
-	```
+			return null;
+		}
+       ```
 7. Build and Export into jar
-        
-```
-	remove ->	path\to\project_name\src\
-		adf-richclient-automation-11-src.zip
-	Project Explorer -> Export -> Java -> JAR file -> Next
-		select src folder only
-		check Export generated classes and resources
-		uncheck .classpath, .project
-			-> Finish -> Ok in warning dialog  
-```
-8. Optional fix error in classes from test.* packages.
-
-	- path/to/project_name/src/oracle/adf/view/rich/automation/test/selenium/WebDriverManager.java
-	  - []	87 Type mismatch: cannot convert from element type Object to String ->
-          
-           ```
-			fix 85 Set<String> windowHandles = webDriver.getWindowHandles();
-			=
+   ```
+    remove -> path\to\project_name\src\adf-richclient-automation-11-src.zip
+    Project Explorer -> Export -> Java -> JAR file -> Next
+	    select src folder only
+	    check Export generated classes and resources
+	    uncheck .classpath, .project
+		    -> Finish -> Ok in warning dialog  
+   ```
+8. Optional fix error in classes from oracle.adf.view.rich.automation.test.* packages.
+   - path/to/project_name/src/oracle/adf/view/rich/automation/test/selenium/WebDriverManager.java
+     - [] 87 Type mismatch: cannot convert from element type Object to String ->
+       ```java
+		fix 85 Set<String> windowHandles = webDriver.getWindowHandles();
+		=
+		try {
+			Set<String> windowHandles = webDriver.getWindowHandles();
+			_LOG.fine("try to close all windows... ");
+			for (String handle : windowHandles) {	
+       ```
+   - path/to/project_name/src/oracle/adf/view/rich/automation/test/selenium/RichWebDriverTest.java
+     - [] 953 Syntax error on token "finally", delete this token ->
+       ```java        
+       fix -> delete  956,952,949, 941
+		=
+		protected void refresh() {
+			_LOG.fine("Executing refresh()");
+			this.getWebDriver().navigate().refresh();
 			try {
-				Set<String> windowHandles = webDriver.getWindowHandles();
-				_LOG.fine("try to close all windows... ");
-				for (String handle : windowHandles) {	
-	   ```
-	- path/to/project_name/src/oracle/adf/view/rich/automation/test/selenium/RichWebDriverTest.java
-	  - []	953 Syntax error on token "finally", delete this token ->
-        
-        ~~~~            fix -> delete  956,952,949, 941
-			=
-			protected void refresh() {
-				_LOG.fine("Executing refresh()");
-				this.getWebDriver().navigate().refresh();
-				try {
-					Alert alert = this.getWebDriver().switchTo().alert();
-					if (alert != null) {
-						alert.accept();
-					};
-				}
-				catch (WebDriverException alert) {}
-				finally {
-					this.waitForPage();
-				}
+				Alert alert = this.getWebDriver().switchTo().alert();
+				if (alert != null) {
+					alert.accept();
+				};
 			}
-        ~~~~~
-        
-	  - []	1026 Unreachable catch block for Exception. It is already handled by the catch block for Throwable ->
-         		 ```java
-			 fix-> replace whole method by variant of Jad Decompiler-> 
-				-> Windows -> Preferences -> Java -> Decompiler -> Default Class Decompiler: Jad -> Applay and Close
-				-> fix 1020, 1028 Duplicate local variable cachingEnabled ->
-					fix-> delete
-					-> 1019 String msg;
+			catch (WebDriverException alert) {}
+			finally {
+				this.waitForPage();
+			}
+		}
+       ```
+     - [] 1026 Unreachable catch block for Exception. It is already handled by the catch block for Throwable ->
+       ```
+		fix -> replace whole method by variant of Jad Decompiler-> 
+			-> Windows -> Preferences -> Java -> Decompiler -> Default Class Decompiler: Jad -> Applay and Close
+			-> fix 1020, 1028 Duplicate local variable cachingEnabled ->
+				fix-> delete
+				    -> 1019 String msg;
 					-> 1018 boolean cachingEnabled;
-			=
-			protected void onShutdownBrowser() {
-				\_LOG.finest("Shutting down browser");
+		=
+		protected void onShutdownBrowser() {
+			_LOG.finest("Shutting down browser");
+			try {
+				_logSeleniumBrowserLogAndResetLoggerLevel();
+			} catch (Exception e) {
+				boolean cachingEnabled;
+				String msg;
+					_LOG.warning("The page did not generate any logs.");
+			} finally {
+				boolean cachingEnabled = isBrowserCachingEnabled();
 				try {
-					\_logSeleniumBrowserLogAndResetLoggerLevel();
-				} catch (Exception e) {
-					boolean cachingEnabled;
-					String msg;
-					\_LOG.warning("The page did not generate any logs.");
-				} finally {
-					boolean cachingEnabled = isBrowserCachingEnabled();
-					try {
-						if (cachingEnabled) {
-							getWebDriverManager().releaseInstance();
-						} else {
-							getWebDriverManager().destroyInstance();
-						}
-					} catch (Throwable t) {
-						String msg = cachingEnabled
-								? "Failed to release the browser. Error message: %s"
-								: "Failed to shutdown the browser. Error message: %s";
-						\_LOG.severe(String.format(msg, new Object[]{t.getMessage()}));
+					if (cachingEnabled) {
+						getWebDriverManager().releaseInstance();
+					} else {
+						getWebDriverManager().destroyInstance();
 					}
+				} catch (Throwable t) {
+					String msg = cachingEnabled
+							? "Failed to release the browser. Error message: %s"
+							: "Failed to shutdown the browser. Error message: %s";
+					_LOG.severe(String.format(msg, new Object[]{t.getMessage()}));
 				}
 			}
-	  ```		
-	  - []	1047 Type mismatch: cannot convert from element type Object to WebElement ->
-          ```
-			fix 1046 List<WebElement> allOptions = element.findElements(By.xpath((String) builder.toString()));
-			=
-			List<WebElement> allOptions = element.findElements(By.xpath((String) builder.toString()));
-			for (WebElement option : allOptions) {
-	  ```			
-	- path/to/project_name/src/oracle/adf/view/rich/automation/test/UrlFactories.java
-	  - []	34 Type mismatch: cannot convert from UrlFactory to UrlFactories.UrlFactoryImpl ->
-          ```
-			fix Add cast to 'UrlFactoryImpl'
-			=
-			factory = (UrlFactoryImpl) urlFactoryIterator.next();
-          ``` 
-	  - []	52 Type mismatch: cannot convert from UrlFactory to UrlFactories.UrlFactoryImpl
-          ```
-			fix Add cast to 'UrlFactoryImpl'
-			=
-			UrlFactoryImpl urlFactoryImpl = (UrlFactoryImpl) (_INSTANCE = factory != null ? factory : new UrlFactoryImpl());
-          ```
+		}
+       ```		
+     - [] 1047 Type mismatch: cannot convert from element type Object to WebElement ->
+       ```
+		fix 1046 List<WebElement> allOptions = element.findElements(By.xpath((String) builder.toString()));
+		=
+		List<WebElement> allOptions = element.findElements(By.xpath((String) builder.toString()));
+		for (WebElement option : allOptions) {
+       ```			
+   - path/to/project_name/src/oracle/adf/view/rich/automation/test/UrlFactories.java
+     - [] 34 Type mismatch: cannot convert from UrlFactory to UrlFactories.UrlFactoryImpl ->
+       ```
+		fix Add cast to 'UrlFactoryImpl'
+		=
+		factory = (UrlFactoryImpl) urlFactoryIterator.next();
+       ``` 
+     - [] 52 Type mismatch: cannot convert from UrlFactory to UrlFactories.UrlFactoryImpl
+       ```
+		fix Add cast to 'UrlFactoryImpl'
+		=
+		UrlFactoryImpl urlFactoryImpl = (UrlFactoryImpl) (_INSTANCE = factory != null ? factory : new UrlFactoryImpl());
+       ```
