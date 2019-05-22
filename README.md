@@ -1,12 +1,12 @@
 # adf-richclient-automation-selenium-3-rebuild
-This repository contains Eclipse java project for rebuilding adf-richclient-automation-11.jar with selenium-java-3-3-1 libs
+This repository contains Eclipse Java project for rebuilding `adf-richclient-automation-11.jar` with selenium-java-3-3-1 libs
 
-Sources of adf-richclient-automation-11.jar produced by decompiling distributed with JDeveloper library.
+Sources of adf-richclient-automation-11.jar produced by decompiling `adf-richclient-automation-11.jar` distributed with JDeveloper.
 
 This is workaround solution for https://stackoverflow.com/questions/52042307/how-to-get-adf-richclient-automation-11-jar-compatible-with-the-latest-selenium
-until official version will be released.
+until official version of `adf-richclient-automation-11.jar` will be released.
  
-If you have faced with such exception rebuilt library will fix it:
+If you have faced with such exception then rebuilt library will fix it:
  
 ~~~~
 org.openqa.selenium.WebDriverException: java.lang.NoSuchMethodError: org.openqa.selenium.support.ui.**WebDriverWait.until(Lcom/google/common/base/Function;)Ljava/lang/Object;** Build info: version: 'unknown', revision: '5234b32', time: '2017-03-10 09:00:17 -0800' System info: host: 'EE-LATITUDE-749', ip: '10.10.207.64', os.name: 'Windows 10', os.arch: 'amd64', os.version: '10.0', java.version: '1.8.0_172' Driver info: driver.version: unknown
